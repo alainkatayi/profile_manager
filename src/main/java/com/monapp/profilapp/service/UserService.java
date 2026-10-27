@@ -1,5 +1,6 @@
 package com.monapp.profilapp.service;
 
+import com.monapp.profilapp.dto.UpdateProfileRequest;
 import com.monapp.profilapp.dto.UserResponse;
 import com.monapp.profilapp.entity.User;
 import com.monapp.profilapp.repository.UserRepository;
@@ -22,6 +23,17 @@ public class UserService {
                 .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Utilisateur introuvable"));
 
         return userMapper.toResponse(user);
+    }
+
+    public UserResponse updateMyProfile(String email, UpdateProfileRequest request){
+        //on charge l'utilisateur connecté(identifié par son token
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND,"Utilisateur introuvable"));
+        user.setFirstname(request.firstname());
+        user.setLastname(request.lastname());
+
+        User saved = userRepository.save(user);
+        return userMapper.toResponse(saved);
     }
 
 }

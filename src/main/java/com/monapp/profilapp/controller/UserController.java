@@ -1,7 +1,9 @@
 package com.monapp.profilapp.controller;
 
+import com.monapp.profilapp.dto.UpdateProfileRequest;
 import com.monapp.profilapp.dto.UserResponse;
 import com.monapp.profilapp.service.UserService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -22,5 +24,12 @@ public class UserController {
 
         String email = authentication.getName();
         return ResponseEntity.ok(userService.getMyProfile(email));
+    }
+
+    @PutMapping("/me")
+    public ResponseEntity<UserResponse> updateMe(Authentication authentication, @Valid @RequestBody UpdateProfileRequest request){
+        String email = authentication.getName();
+        return ResponseEntity.ok(userService.updateMyProfile(email, request));
+
     }
 }
