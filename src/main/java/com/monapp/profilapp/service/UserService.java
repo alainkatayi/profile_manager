@@ -10,6 +10,9 @@ import lombok.Setter;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import org.w3c.dom.stylesheets.LinkStyle;
+
+import java.util.List;
 
 @Service
 @Setter
@@ -34,6 +37,27 @@ public class UserService {
 
         User saved = userRepository.save(user);
         return userMapper.toResponse(saved);
+    }
+
+    //tout kes utilisateurs.
+    public List<UserResponse> getAllUsers(){
+        return userRepository.findAll().stream()
+                .map(userMapper::toResponse)
+                .toList();
+    }
+
+    public UserResponse getUserById(Long id){
+        User user = userRepository.findById(id)
+                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Utilisateur non trouvé"));
+        return userMapper.toResponse(user);
+    }
+
+    public  void deleteUser(Long id){
+
+        if (!userRepository.existsById(id)){
+            throw  new ResponseStatusException(HttpStatus.NOT_FOUND, "Utilisateur non trouvé");
+        }
+       userRepository.deleteById(id);
     }
 
 }

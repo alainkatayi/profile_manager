@@ -6,8 +6,11 @@ import com.monapp.profilapp.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @RestController
@@ -31,5 +34,25 @@ public class UserController {
         String email = authentication.getName();
         return ResponseEntity.ok(userService.updateMyProfile(email, request));
 
+    }
+
+    @GetMapping
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<List<UserResponse>> getAll(){
+        return ResponseEntity.ok(userService.getAllUsers());
+    }
+
+    @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<UserResponse> getById(@PathVariable Long id){
+        //pathVariable recupere l'id de l'url
+        return ResponseEntity.ok(userService.getUserById(id));
+    }
+
+    @DeleteMapping("{id}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<Void> delete(@PathVariable Long id){
+        userService.deleteUser(id);
+        return ResponseEntity.noContent().build() ;
     }
 }
