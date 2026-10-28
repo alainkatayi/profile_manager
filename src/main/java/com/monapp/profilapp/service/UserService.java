@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import org.w3c.dom.stylesheets.LinkStyle;
 
@@ -20,6 +21,7 @@ import java.util.List;
 public class UserService {
     private final UserRepository userRepository;
     private  final UserMapper userMapper;
+    private final FileStorageService fileStorageService;
 
     public UserResponse getMyProfile(String email){
         User user = userRepository.findByEmail(email)
@@ -36,6 +38,27 @@ public class UserService {
         user.setLastname(request.lastname());
 
         User saved = userRepository.save(user);
+        return userMapper.toResponse(saved);
+    }
+
+    public UserResponse updateMyProfileImage(String email, MultipartFile file){
+        //on charge l'utilisateur connecté
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(()-> new ResponseStatusException(HttpStatus.NOT_FOUND, "Utilisateur non trouvé"));
+
+        //on garde le nom de l'ancienne photo
+        String oldImage = user.getProfileImage();
+
+        // s'il y'a une erreur, on declaclanche une erreur ici, et l'ancienne image reste
+        String newImage = fileStorageService.store(file);
+
+        //on met la nouvelle image en base
+        user.setProfileImage(newImage);
+        User saved = userRepository.save(user);
+
+        //apres on supprime l'ancienne du disk
+        fileStorageService.delete(oldImage);
+
         return userMapper.toResponse(saved);
     }
 

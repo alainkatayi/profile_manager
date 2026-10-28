@@ -5,10 +5,12 @@ import com.monapp.profilapp.dto.UserResponse;
 import com.monapp.profilapp.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -54,5 +56,11 @@ public class UserController {
     public ResponseEntity<Void> delete(@PathVariable Long id){
         userService.deleteUser(id);
         return ResponseEntity.noContent().build() ;
+    }
+
+    @PostMapping(value = "/me/images",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<UserResponse> uploadImage(Authentication authentication, @RequestParam("file")MultipartFile file){
+        String email = authentication.getName();
+        return ResponseEntity.ok(userService.updateMyProfileImage(email, file));
     }
 }
